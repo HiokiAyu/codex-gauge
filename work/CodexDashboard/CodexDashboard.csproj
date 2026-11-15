@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>WinExe</OutputType><ApplicationIcon>assets/app.ico</ApplicationIcon><Version>1.0.0-rc.24</Version><TargetFramework>net10.0-windows</TargetFramework><Nullable>enable</Nullable><UseWindowsForms>true</UseWindowsForms><ImplicitUsings>enable</ImplicitUsings><AssemblyName>Codex大看板</AssemblyName></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="assets/app.ico" LogicalName="AppIcon.ico"/><PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35"/><Content Include="workload-monitor.js;request-ledger.js;session-reconcile-cache.js;account-reconciliation.js;mixed-calibration.js;experience.css;locales/*.json;data-root.js;preferences.js;reset-news.js;experience.js;backend.js;stats.js;log-checkpoints.js;archive-cache.js;storage-backup.js;update-client.js;update-source.json;update-package.js;install-worker.js;quota.js;quota-windows.js;time-zone.js;project-ledger.js;diagnostics.js;app-info.json;calibration.js;value-meter.js;seed-owner.json;dashboard.html" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <Target Name="ExcludeUnusedWebView2Wpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+</Project>

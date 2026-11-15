@@ -1,0 +1,10 @@
+CodexGauge · Codex 大看板
+
+需要 Windows x64、本机已登录订阅账号的 Codex 和 Microsoft Edge WebView2。
+启动后打开总览查看周额度和周期进度。点右上角 × 可留在托盘采集。
+右上角设置支持语言、主题、托盘、自启动和日志目录。退出可使用托盘菜单。
+在「数据与算法」中可以区分官方读数、本机 Token 与未校准的估测。
+
+在线文档 https://github.com/HiokiAyu/codex-gauge
+预览版 https://github.com/HiokiAyu/codex-gauge/releases/tag/ota-preview
+

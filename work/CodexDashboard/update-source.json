@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "provider": "github",
+  "repository": "HiokiAyu/codex-gauge",
+  "channel": "preview",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAond2/+/xz9WQDWcUn9aS\nfnhWTHYd11RZnQoeP6IdmMFGj7droTSAIU6y5crkGEJg1hYVZEym/y8ZNTBkXudU\nuBNbYsLKOjJ27YGgk0oVKSCmKPDD95Gn2xCiix9PXwPqeg6nC9bQ1ZaJLGP+wHLi\ncM4Xfq4dinH0WxuDWAfWr8vKgvYJotk0Sa/FuGSJgUOhYJ9iDA3uI370tjuliIhu\nynVL/KEFHRI6FayNFEROoNGTP+xzbfUbVhZKaY+uH6OJkBvxKfMIrevxtg/6gWpM\nAjvpXZGAUWfNh47/DLRazFsFqoNusNb82mQ+GOibrdnydZcPEyMIZ5nA1fbVrAio\nWWM/R1/WVD0Em6DU7qD2fEcIiqD7okSniRpwDmFeY4UMAeNlkCAxj5h9XXygCFIM\nTH+TikbLkSRcHFQjcXzwHBFOfH7lIe4gPR6uiYbTYgOo54EX17oCecElTPud4cMe\n6P5HGr4IdmKzptdeDB4XqkH4LIOVgfsem2PJ/kZsEABtAgMBAAE=\n-----END PUBLIC KEY-----\n"
+}

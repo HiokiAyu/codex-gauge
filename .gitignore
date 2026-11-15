@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+*.user
+*.sqlite*
+*.jsonl
+*.pem
+*.pfx
+*.dpapi
+/outputs/
+/work/release-tools/
+/work/v1-*/
+

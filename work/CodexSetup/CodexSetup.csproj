@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><ApplicationIcon>../CodexDashboard/assets/app.ico</ApplicationIcon><Version>1.0.0-rc.24</Version>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Codex大看板-安装</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../CodexDashboard/assets/app.ico" LogicalName="AppIcon.ico" />
+    <EmbeddedResource Include="$(PayloadZip)" LogicalName="Payload.zip" Condition="Exists('$(PayloadZip)')" />
+    <EmbeddedResource Include="$(PayloadManifest)" LogicalName="Manifest.json" Condition="Exists('$(PayloadManifest)')" />
+    <EmbeddedResource Include="../CodexDashboard/locales/*.json" LogicalName="locales/%(Filename).json" />
+  </ItemGroup>
+  <Target Name="RequirePayload" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(PayloadZip)') Or !Exists('$(PayloadManifest)')" Text="Build with PayloadZip and PayloadManifest." />
+  </Target>
+</Project>
