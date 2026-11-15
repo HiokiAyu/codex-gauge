@@ -8,5 +8,5 @@
 *.dpapi
 /outputs/
 /work/release-tools/
-/work/v1-*/
+/work/v1-*
 

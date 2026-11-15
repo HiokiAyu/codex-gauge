@@ -26,6 +26,8 @@ The installer is written to `outputs/`. To build without an installer, use `dotn
 
 The official preview uses the public key shipped in `work/CodexDashboard/update-source.json` and the `ota-preview` GitHub Release. Disable that provider or configure your own repository and key when distributing a fork. The release helper in `work/release-kit.cjs` creates a signed manifest and validates the build evidence. Keep signing keys and any passphrases outside the repository. Bundled Node.js, .NET, and WebView2 notices are included in the installer.
 
+If the next version is delayed, renew the preview's signed manifest before the recorded expiry to keep OTA discovery working. Verify the original payload and leave its version and attachment hashes intact when renewing the manifest.
+
 ## Reports and contributions
 
 For a bug report, include the app version, the Windows version, and reproduction steps. Use synthetic fixtures for parser and reconciliation tests. Update all four files in `work/CodexDashboard/locales/` when adding interface strings. Open a pull request with the relevant tests and a changelog entry.
