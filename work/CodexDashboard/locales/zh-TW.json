@@ -2,6 +2,9 @@
   "id": "zh-TW",
   "name": "繁體中文",
   "strings": {
+    "reconciliationProvisional": "暫定",
+    "reconciliationReviewAt": "官方彙總仍為暫定值，最早於 {time} 複核",
+    "reconciliationTiming": "官方每日彙總可能在初次對帳後補記。UTC 日結束滿 48 小時、官方數值連續 24 小時未變且對帳一致後，才用於校準。",
     "officialDailyHistory": "官方日彙總修訂記錄",
     "officialDailyHistoryError": "官方日彙總記錄暫時無法儲存或讀取",
     "officialDailyObservedAt": "擷取時間",
@@ -88,6 +91,7 @@
     "none": "無",
     "standard": "標準",
     "fast": "快速",
+    "ultrafast": "極速",
     "unrecorded": "未記錄",
     "usageNote": "快取包含在輸入中，推理包含在輸出中，不重複計量",
     "moreChats": "顯示前 {n} 個會話，請搜尋縮小範圍",

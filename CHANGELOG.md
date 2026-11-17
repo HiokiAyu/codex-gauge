@@ -2,6 +2,15 @@
 
 CodexGauge is in preview. Public preview releases include a download or a signed update. Earlier milestones describe local development.
 
+## RC26 · 1.0.0-rc.26
+
+- Add GPT‑6.2 Sol and GPT‑6.2 Astra to the quota estimator and track calibration separately for each model. Estimates use Codex rates for uncached input, cached input, and output. Fast counts as 2× Standard and Ultrafast as 6× for included usage. A weekly percentage requires a reference coefficient for the account or enough reconciled readings to calibrate one. [OpenAI Codex pricing](https://learn.chatgpt.com/docs/pricing?codex-pricing-plans=individual#speed-multipliers)
+- Include the daily reconciliation improvements from the local RC25 build.
+
+## RC25 · Local milestone
+
+- Reconcile past UTC dates again when official totals change. A date can enter calibration once it has been closed for 48 hours, its official total has held steady for 24 hours, and the local total reconciles.
+
 ## RC24 · 1.0.0-rc.24
 
 - Save the first official Token total for each UTC date and record every later revision. The dashboard shows when the value was observed, the previous and new totals, and the change.

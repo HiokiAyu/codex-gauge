@@ -1,6 +1,7 @@
 // Local, account-scoped calibration. Stores numerical telemetry only.
 const fs=require('fs'),path=require('path'),crypto=require('crypto'),{DatabaseSync}=require('node:sqlite');
 const {MAX_READING_GAP}=require('./quota');
+const {reviewAfter}=require('./account-reconciliation');
 const VERSION=3,DAY=86400000;
 const POLICY={fitDays:21,halfLifeDays:7,blockMs:3600000,guardMs:300000,minTrain:12,minValidation:6,minTrainPp:10,minValidationPp:5,minSpanMs:2*DAY,priorPp:12,maxStep:.25,improvement:.05};
 const INITIAL_FIT={maxMae:.75,maxBiasFraction:.20,maxRateDeviation:.30,minRecentBlocks:3,minRecentPp:3};
@@ -85,6 +86,7 @@ function createStore(file,seeds){
  db.exec('CREATE INDEX IF NOT EXISTS retained_usage_time ON events(account,at) WHERE retainedAt IS NOT NULL OR invalidatedAt IS NOT NULL;');
  const sampleInsert=db.prepare('INSERT OR IGNORE INTO samples VALUES(?,?,?,?,?,?)');
  const lastOfficialTotal=db.prepare('SELECT observedAt,tokens FROM official_daily_history WHERE account=? AND date=? ORDER BY observedAt DESC LIMIT 1');
+ const officialObservations=db.prepare('SELECT date,tokens,max(observedAt) AS observedAt FROM official_daily_history WHERE account=? AND date>=? GROUP BY date');
  const officialTotalInsert=db.prepare('INSERT INTO official_daily_history VALUES(?,?,?,?,?)');
  const officialHistory=db.prepare(`SELECT date,observedAt,tokens,previousTokens,tokens-previousTokens AS difference
   FROM official_daily_history WHERE account=? ORDER BY observedAt DESC,date DESC LIMIT 100`);
@@ -213,7 +215,7 @@ function createStore(file,seeds){
   }
   return {retainedCalls,invalidatedGaps,invalidatedDates:[...invalidatedDates].sort()};
  }
- function update({account,calls,samples,creditWeight,reset,seedCoefficients=seeds,callsRevision=null,gaps=[],coverageStart=null,completeScan=false,fitReady=true,now=Date.now(),measurementVersion='request-ledger-v3',rateVersion='reference-rates-2026-11-11',accountCoverage=[],reconciliationStatus='pending',reconciliationDays=[],exploratoryCoverage=[],historicalSamples=[],invalidRequests=[],ingestion=null}){
+ function update({account,calls,samples,creditWeight,reset,seedCoefficients=seeds,callsRevision=null,gaps=[],coverageStart=null,completeScan=false,fitReady=true,now=Date.now(),measurementVersion='request-ledger-v3',rateVersion='reference-rates-2026-11-11',accountCoverage=[],reconciliationStatus='pending',reconciliationDays=[],officialObservations=null,exploratoryCoverage=[],historicalSamples=[],invalidRequests=[],ingestion=null}){
   if(!account)return {coefficients:{...seedCoefficients},models:[],policy:POLICY,status:'no-account'};
   ingestion??=collect({account,calls,samples,creditWeight,callsRevision,gaps,coverageStart,completeScan,now,measurementVersion,rateVersion,invalidRequests});
   if(completeScan&&Number.isFinite(coverageStart)){
@@ -259,6 +261,10 @@ function createStore(file,seeds){
    for(const d of matchedDays){
     const start=Date.parse(d.date+'T00:00:00Z'),end=start+DAY;
     if(start<now-POLICY.fitDays*DAY||allGaps.some(g=>g.start<end&&g.end>=start))continue;
+    if(officialObservations){
+     const reviewAt=reviewAfter(end,d.officialTokens,officialObservations.get(d.date));
+     if(reviewAt===null||reviewAt>now)continue;
+    }
     const day=dayTotals.get(account,measurementVersion,rateVersion,start,end);
     if(!day.unverified&&day.tokens===d.officialTokens)persistedCoverage.push({start,end:end-1});
    }
@@ -282,7 +288,7 @@ function createStore(file,seeds){
     else if(!coverages.length)report={...evaluate([],coefficient),status:'paused',reason:'等待账户日汇总对账',reasonCode:'reconciliation'};
     else {
      const candidates=buildBlocks(events,liveSamples,model,now,allGaps,coverages);
-     const blocks=Number.isFinite(coefficient)?candidates:candidates.filter(b=>['standard','default','fast','priority'].includes(b.tier));
+     const blocks=Number.isFinite(coefficient)?candidates:candidates.filter(b=>['standard','default','fast','priority','ultrafast'].includes(b.tier));
      report=evaluate(blocks,coefficient,history.at(-1),Number.isFinite(reset)?Math.round(reset/60000):null);
      if(!blocks.length)report.reasonCode='live-samples';
     }
@@ -308,6 +314,7 @@ function createStore(file,seeds){
   return db.prepare("SELECT at,used,reset,source FROM samples WHERE account=? AND at>=? AND source='live' ORDER BY at").all(account,since);
  }
  return {collect,update,readLedgerEvidence,readLiveSamples,recordOfficialDailyTotals,
+  readOfficialObservations:(account,since)=>new Map(officialObservations.all(account,since).map(row=>[row.date,row])),
   readOfficialDailyHistory:account=>officialHistory.all(account),close:()=>db.close()};
 }
 

@@ -5,19 +5,33 @@ const ACCOUNT_REQUIRED=true,MEASUREMENT_VERSION='request-ledger-v3';
 let revision=0,recordCache=null,lastPaths=new Map();
 const stateVersions=new WeakMap(),sessionReconcile=require('./session-reconcile-cache').createCache();
 function changedState(state){revision++;stateVersions.set(state,revision);}
-// OpenAI's published Codex credit rates, credits per million tokens, checked 2026-11-07.
+// OpenAI's published Codex credits per million uncached input, cached input, and output tokens.
 // Better relative weights than API USD prices; subscription allocation is still inferred.
-const RATES={'gpt-6-astra':[250,25,1250],'gpt-6.1-sol':[50,2.5,250],'gpt-6.1-terra':[25,1.25,125],'gpt-6-sol':[50,5,250],'gpt-6-luna':[2.5,.25,12.5],'gpt-5.6-sol':[100,10,500],'gpt-5.6-terra':[50,5,300],'gpt-5.6-luna':[5,.5,30],'daybreak-blue':[100,10,500],'daybreak-red':[312.5,31.25,1875]};
+const RATES={
+ 'gpt-6.2-sol':[50,2.5,250],
+ 'gpt-6.2-astra':[200,10,1000],
+ 'gpt-6-astra':[250,25,1250],'gpt-6.1-sol':[50,2.5,250],'gpt-6.1-terra':[25,1.25,125],'gpt-6-sol':[50,5,250],'gpt-6-luna':[2.5,.25,12.5],'gpt-5.6-sol':[100,10,500],'gpt-5.6-terra':[50,5,300],'gpt-5.6-luna':[5,.5,30],'daybreak-blue':[100,10,500],'daybreak-red':[312.5,31.25,1875]
+};
 // Account-specific model scalars fitted to local token deltas and weekly meter
 // snapshots through 2026-11-08. Other models are deliberately uncalibrated.
 // Values are weekly percentage points per published standard Codex credit.
 const PP_PER_CREDIT={'gpt-6.1-sol':0.0037872568006282518,'gpt-6-astra':0.0033940453479000834,'gpt-6.1-terra':0.006132928702596234,'gpt-6-luna':null};
+// Initial account-scoped estimates. Calibration tracks each new model separately.
+const REFERENCE_PREDECESSORS={'gpt-6.2-sol':'gpt-6.1-sol','gpt-6.2-astra':'gpt-6-astra'};
+const INCLUDED_SPEED_FACTORS={
+ 'gpt-6.2-sol':{fast:2,ultrafast:6},
+ 'gpt-6.2-astra':{fast:2,ultrafast:6}
+};
 function accountSeeds(accountId,plan,models=[]){
  const reference=require('./seed-owner.json');
  const owner=typeof accountId==='string'&&plan==='pro'
   &&createHash('sha256').update(accountId).digest('hex')===reference.accountHash;
- const names=new Set([...Object.keys(PP_PER_CREDIT),...models.filter(model=>Object.hasOwn(RATES,model))]);
- return Object.fromEntries([...names].map(model=>[model,owner?PP_PER_CREDIT[model]??null:null]));
+ const names=new Set([...Object.keys(PP_PER_CREDIT),...Object.keys(REFERENCE_PREDECESSORS),
+  ...models.filter(model=>Object.hasOwn(RATES,model))]);
+ return Object.fromEntries([...names].map(model=>{
+  const referenceModel=REFERENCE_PREDECESSORS[model]??model;
+  return [model,owner?PP_PER_CREDIT[referenceModel]??null:null];
+ }));
 }
 let selectedRoot=path.join(os.homedir(),'.codex'),strictRoot=false;function setRoot(root,strict=false){selectedRoot=root;strictRoot=strict;}
 const states=new Map();let fileIndex=new Map(),fileOwners=new Map(),lastCutoff=null;let running=false,scanStarted=false,done=0,expected=0,errors=0,lastDone=0;
@@ -32,7 +46,14 @@ function useCheckpoints(filename){
  try{checkpoints=require('./log-checkpoints').openCheckpoints(filename,MEASUREMENT_VERSION+'-checkpoint-2');}
  catch(error){checkpointError=error.code||'open-failed';}
 }
-function tierFactor(e){const t=e.tier;if(t==null||t==='default'||t==='standard')return 1;if(t==='priority'||t==='fast')return 2.5;return null}
+function tierFactor(e){
+ const tier=e.tier;
+ if(tier==null||tier==='default'||tier==='standard')return 1;
+ const factors=INCLUDED_SPEED_FACTORS[e.model];
+ if(tier==='priority'||tier==='fast')return factors?.fast??2.5;
+ if(tier==='ultrafast')return factors?.ultrafast??null;
+ return null;
+}
 function HAS_CREDIT_RATE(e){return e.usageVerified!==false&&!e.attributionUnverified&&!!RATES[e.model]&&tierFactor(e)!=null}
 function PRICED(e){return HAS_CREDIT_RATE(e)&&Number.isFinite(PP_PER_CREDIT[e.model])}
 function creditWeight(e){if(e.usageVerified===false||e.attributionUnverified)return 0;const p=RATES[e.model],factor=tierFactor(e);if(!p||factor==null)return 0;const input=e.input_tokens,cached=Math.min(input,e.cached_input_tokens),uncached=Math.max(0,input-cached);return factor*(uncached*p[0]+cached*p[1]+e.output_tokens*p[2])/1e6}

@@ -2,6 +2,9 @@
   "id": "ja",
   "name": "日本語",
   "strings": {
+    "reconciliationProvisional": "暫定値",
+    "reconciliationReviewAt": "暫定値です。{time} 以降に照合を再判定します。",
+    "reconciliationTiming": "日次集計は初回の照合後にも更新されます。学習は日付の終了から48時間、最後の変更から24時間が経過して一致した集計を使用します。",
     "officialDailyHistory": "公式の日次集計の変更履歴",
     "officialDailyHistoryError": "日次集計の履歴を保存または読み取れません",
     "officialDailyObservedAt": "取得時刻",
@@ -88,6 +91,7 @@
     "none": "なし",
     "standard": "標準",
     "fast": "高速",
+    "ultrafast": "超高速",
     "unrecorded": "記録なし",
     "usageNote": "キャッシュは入力、推論は出力に含まれ、二重計上しません",
     "moreChats": "先頭 {n} 件を表示。検索で絞り込んでください",

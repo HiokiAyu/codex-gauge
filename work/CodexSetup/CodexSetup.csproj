@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType><ApplicationIcon>../CodexDashboard/assets/app.ico</ApplicationIcon><Version>1.0.0-rc.24</Version>
+    <OutputType>WinExe</OutputType><ApplicationIcon>../CodexDashboard/assets/app.ico</ApplicationIcon><Version>1.0.0-rc.26</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>

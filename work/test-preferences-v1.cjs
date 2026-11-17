@@ -20,6 +20,21 @@ try{
   assert(Object.values(stats.accountSeeds('different-account','pro')).every(value=>value===null));
   assert(Object.values(stats.accountSeeds('reference-account','plus')).every(value=>value===null));
   assert.equal(stats.accountSeeds('reference-account','pro')['gpt-6.1-sol'],stats.PP_PER_CREDIT['gpt-6.1-sol']);
+  const seeds=stats.accountSeeds('reference-account','pro');
+  assert.equal(seeds['gpt-6.2-sol'],stats.PP_PER_CREDIT['gpt-6.1-sol']);
+  assert.equal(seeds['gpt-6.2-astra'],stats.PP_PER_CREDIT['gpt-6-astra']);
+  const usage={input_tokens:2e6,cached_input_tokens:1e6,output_tokens:1e6};
+  for(const [model,base] of [['gpt-6.2-sol',302.5],['gpt-6.2-astra',1210]]){
+   assert.equal(stats.creditWeight({...usage,model,tier:'standard'}),base);
+   assert.equal(stats.creditWeight({...usage,model,tier:'fast'}),base*2);
+   assert.equal(stats.creditWeight({...usage,model,tier:'priority'}),base*2);
+   assert.equal(stats.creditWeight({...usage,model,tier:'ultrafast'}),base*6);
+   assert.equal(stats.creditWeight({...usage,model,tier:'unknown'}),0);
+   assert.equal(stats.quotaWeight({...usage,model,tier:'fast'},seeds),base*2*seeds[model]);
+   assert.equal(stats.quotaWeight({...usage,model,tier:'fast'},stats.accountSeeds('different-account','pro')),0);
+  }
+  assert.equal(stats.creditWeight({...usage,model:'gpt-6.1-sol',tier:'fast'}),302.5*2.5);
+  assert.equal(stats.creditWeight({...usage,model:'gpt-6.1-sol',tier:'ultrafast'}),0);
  }finally{reference.accountHash=originalHash;}
  let prefs=reload();
  assert.equal(prefs.get().trayOnClose,true,'fresh installs collect in the tray after closing');

@@ -348,8 +348,14 @@ async function buildSnapshot(responseState,generation,forceScan){
  }
  const calls=retainedCalls.length?[...o.calls,...retainedCalls]:o.calls;
  const officialDays=accountId&&responseState.accountDataAccount===accountId?responseState.account?.dailyUsageBuckets:[];
+ let officialObservations=new Map(),officialHistoryError=!!accountId&&(!calibrationStore||!!responseState.officialDailyHistoryError);
+ if(accountId&&calibrationStore){
+  try{
+   officialObservations=calibrationStore.readOfficialObservations(accountId,new Date(now-90*86400000).toISOString().slice(0,10));
+  }catch{officialHistoryError=true;}
+ }
  const reconciliation=require('./account-reconciliation').compare(calls,officialDays,{
-  now,coverageStart:detail.coverageStart,gaps,complete:completeScan,
+  now,coverageStart:detail.coverageStart,gaps,complete:completeScan,officialObservations,
   liveReadings:observed.filter(q=>q.account===accountId&&q.plan===plan&&q.source==='live'),
   fresh:!!accountId&&!responseState.error&&!responseState.accountError&&responseState.accountDataAccount===accountId&&now-(responseState.accountUpdated||0)<120000
  });
@@ -357,6 +363,7 @@ async function buildSnapshot(responseState,generation,forceScan){
   calibration=calibrationStore.update({...measure,ingestion,reset:end,gaps,
    fitReady:completeScan&&!responseState.error,seedCoefficients:seeds,
    accountCoverage:reconciliation.eligibleCoverage,reconciliationStatus:reconciliation.status,
+   officialObservations,
    reconciliationDays:reconciliation.sourceFresh?reconciliation.days:[],
    exploratoryCoverage:reconciliation.exploratoryCoverage,historicalSamples:o.samples.filter(s=>s.plan===plan)});
  }catch(e){calibrationError=e.message;}}
@@ -399,7 +406,7 @@ async function buildSnapshot(responseState,generation,forceScan){
  if(accountId){
   try{
    reconciliation.officialHistory=calibrationStore?.readOfficialDailyHistory(accountId)??[];
-   reconciliation.officialHistoryError=!calibrationStore||!!responseState.officialDailyHistoryError;
+   reconciliation.officialHistoryError=officialHistoryError;
   }catch{reconciliation.officialHistoryError=true;}
  }
  detail.reconciliation=reconciliation;detail.calibration=calibration;detail.calibrationError=calibrationError;detail.checkpointError=stats.checkpointStatus();detail.scanMetrics=stats.scanMetrics();detail.sourceError=!sourceAvailable;if(!sourceAvailable)detail.errors=(detail.errors||0)+1;

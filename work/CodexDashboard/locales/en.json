@@ -2,6 +2,9 @@
   "id": "en",
   "name": "English",
   "strings": {
+    "reconciliationProvisional": "Provisional",
+    "reconciliationReviewAt": "The total is provisional. Next eligibility check at {time}.",
+    "reconciliationTiming": "Daily total revisions can arrive after the first comparison. Training uses reconciled totals after the day has been closed for 48 hours and the value has been unchanged for 24 hours.",
     "officialDailyHistory": "Official daily total revisions",
     "officialDailyHistoryError": "Could not save or read the daily total history",
     "officialDailyObservedAt": "Observed at",
@@ -88,6 +91,7 @@
     "none": "None",
     "standard": "Standard",
     "fast": "Fast",
+    "ultrafast": "Ultrafast",
     "unrecorded": "Not recorded",
     "usageNote": "Cache is included in input; reasoning in output. Neither is counted twice",
     "moreChats": "Showing first {n} chats; search to narrow results",
